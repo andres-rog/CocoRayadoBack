@@ -1,13 +1,14 @@
 const router = require('express').Router();
 const {verifyToken} = require('../config/auth');
-const { createRecipe, findRecipes, editRecipe, deleteRecipe } = require('../controllers/recipeController');
+const { createRecipe, findRecipes, findRecipe, editRecipe, deleteRecipe } = require('../controllers/recipeController');
 const uploadCloud = require('../config/cloudinary');
 const { upload } = require('../controllers/cloudinaryController');
 
 router.post('/create', verifyToken, createRecipe);
-router.post('/findRecipes', findRecipes);
-router.post('/editRecipe', editRecipe);
-router.post('/deleteRecipe', deleteRecipe);
-router.post('/upload', uploadCloud.array('imagenesReceta', 16),upload)
+router.post('/findRecipes', verifyToken, findRecipes);
+router.post('/findRecipe', verifyToken, findRecipe);
+router.post('/editRecipe', verifyToken, editRecipe);
+router.post('/deleteRecipe', verifyToken, deleteRecipe);
+router.post('/upload', verifyToken, uploadCloud.array('imagenesReceta', 16),upload)
 
 module.exports = router

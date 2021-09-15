@@ -1,7 +1,6 @@
 const cloudinary = require('cloudinary')
 
 exports.upload = async(req,res) =>{
-
     const uploads = (file, folder) =>{
         return new Promise(resolve =>{
             cloudinary.uploader.upload(file, (result)=>{

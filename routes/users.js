@@ -1,9 +1,9 @@
-var express = require('express');
-var router = express.Router();
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+const router = require('express').Router();
+const {verifyToken} = require('../config/auth');
+const { addRecipeToFavorites, removeRecipeFromFavorites } = require('../controllers/userController');
+
+router.post('/addFavoriteRecipe', verifyToken, addRecipeToFavorites);
+router.post('/removeFavoriteRecipe', verifyToken, removeRecipeFromFavorites);
 
 module.exports = router;

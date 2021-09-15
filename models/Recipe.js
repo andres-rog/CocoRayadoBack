@@ -34,8 +34,11 @@ const recipeSchema = new Schema({
     },
     tags: {
         type:[String],
-        required:[true,"Debes agregar por lo menos una categoria a la receta"],
-        ref:"Tag"
+        required:[true,"Debes agregar por lo menos una categoria a la receta."]
+    },
+    ingredients: {
+        type:[String],
+        required:[true,"Debes agregar por lo menos un ingrediente principal a la receta."]
     },
     favorites: {
         type:Number,

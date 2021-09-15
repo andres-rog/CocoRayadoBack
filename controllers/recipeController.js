@@ -30,29 +30,43 @@ exports.editRecipe = (req, res, next) => {
 //Eliminar receta
 exports.deleteRecipe = (req, res, next) => {
     const {_id} = req.body;
-    console.log("REQUEST",restRequest);
 
-    Recipe.findOneAndDelete({$and:[{_id},{_owner:req.user_id}]},restRequest, {new:true})
+    Recipe.findOneAndDelete({_id})
     .then(() => {
         res.status(200).json({msg:'Receta eliminada'})
     })
     .catch( error => res.status(400).json({error}))
 }
 
+//Obtener receta en especifico
+exports.findRecipe = (req, res, next) => {
+    const {_id} = req.body;
+
+    Recipe.findById(_id)
+    .then((recipe) => {
+        res.status(200).json({recipe})
+    })
+    .catch( error => res.status(400).json({error}))
+}
+
 //Buscar recetas
 exports.findRecipes = (req, res, next) => {
-    const {title, tags, ingredientsAmount, orderBy="date", orderDirection=-1, prioritizeFavoriteIngredients=true} = req.body;
-
+    const {title, tags, ingredients, maxIngredients, orderBy="date", type="search"} = req.body;
+    console.log("REQ USER",req.user)
     //Por default se ordena por _id (orden/fecha de creacion)
-    let sortBy = {_id:orderDirection};
+    let sortBy = {_id:-1};
     let queryArray = [];
 
-    if(title) queryArray.push({title});
-    if(tags) queryArray.push({tags: {$in:tags}});
-    if(ingredientsAmount) queryArray.push({ingredientsAmount});
-    if(orderBy==="ingredients") sortBy={ingredientsAmount:orderDirection}
-    if(orderBy==="calories") sortBy={caloriesPerServing:orderDirection}
-    const request = {$and:queryArray}
+    if(type==="myRecipes") queryArray.push({_owner:req.user._id});
+    if(type==="myFavorites") queryArray.push({_id:{$in:req.user._favoritos}});
+    if(title) queryArray.push({title:{$regex:`.*${title}.*`, $options:'i'}});
+    if(tags.length>0) queryArray.push({tags: {$in:tags}});
+    if(ingredients.length>0) queryArray.push({ingredients: {$in:ingredients}});
+    if(maxIngredients) queryArray.push({ingredientsAmount:{$lte:maxIngredients}});
+    if(orderBy==="favoritos") sortBy={favorites:-1}
+
+    let request=null;
+    if (queryArray.length>0) request = {$and:queryArray}
     console.log("REQUEST",queryArray);
     console.log("SORT",sortBy);
 
@@ -62,7 +76,7 @@ exports.findRecipes = (req, res, next) => {
         recipesArr.forEach(recipe => {
 
             //If the user is searching by tag, then look for the recipes with most of the user selected tags
-            if(tags){
+            if(tags.length>0){
                 let countMatchingTags=0;
                 tags.forEach(tag =>{
                     if(recipe.tags.find(recipeTag => recipeTag===tag)) countMatchingTags++;
@@ -70,18 +84,28 @@ exports.findRecipes = (req, res, next) => {
                 recipe.matchedTags=countMatchingTags;
             }
 
-            //If the user is prioritizing recipes by favorite ingredients, then look for the recipes with most of the user favorite ingredients
-            if(prioritizeFavoriteIngredients) {
-                let countMatchingFavorites=0;
-                req.user.favorites.forEach(favorite =>{
-                    if(recipe.ingredient.find(recipeIngredient => recipeIngredient===favorite)) countMatchingFavorites++;
+            //If the user is searching by ingredient, then look for the recipes with most of the user selected ingredients
+            if(ingredients.length>0){
+                let countMatchingIngredients=0;
+                ingredients.forEach(ingredient =>{
+                    if(recipe.ingredients.find(recipeIngredient => recipeIngredient===ingredient)) countMatchingIngredients++;
                 })
-                recipe.matchedIngredients=countMatchingFavorites;
+                recipe.matchedIngredients=countMatchingIngredients;
+            }
+
+            //If the user is prioritizing recipes by favorite ingredients, then look for the recipes with most of the user favorite ingredients
+            if(orderBy==="ingredientesFavoritos") {
+                let countMatchingFavorites=0;
+                req.user.ingredientesFavoritos.forEach(favorite =>{
+                    if(recipe.ingredients.find(recipeIngredient => recipeIngredient===favorite)) countMatchingFavorites++;
+                })
+                recipe.matchedFavorites=countMatchingFavorites;
             }
         });
-        //Sort by matching ingredients and tags
-        if(tags) recipesArr.sort((a, b) => (b.matchedTags) - (a.matchedTags));
-        if(prioritizeFavoriteIngredients) recipesArr.sort((a, b) => (b.matchedIngredients) - (a.matchedIngredients));
+        //Sort by matching favorites, ingredients and tags
+        if(tags.length>0) recipesArr.sort((a, b) => (b.matchedTags) - (a.matchedTags));
+        if(ingredients.length>0) recipesArr.sort((a, b) => (b.matchedIngredients) - (a.matchedIngredients));
+        if(orderBy==="ingredientesFavoritos") recipesArr.sort((a, b) => (b.matchedFavorites) - (a.matchedFavorites));
 
         res.status(200).json({result:recipesArr})
     })

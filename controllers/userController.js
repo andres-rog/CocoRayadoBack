@@ -1,6 +1,5 @@
 const User = require('../models/User');
-const Recipe = require('../models/Recipes');
-const { favs10mail, favs100mail, favs1000mail } = require('../config/nodemailer');
+const Recipe = require('../models/Recipe');
 
 //Editar usuario
 exports.edit = (req, res, next) => {
@@ -18,22 +17,14 @@ exports.edit = (req, res, next) => {
 exports.addRecipeToFavorites = (req, res, next) => {
     const {_id} = req.user;
     const{_recipeId} = req.body;
-
-    User.findByIdAndUpdate(_id,{$push:{_favorites:_recipeId}},{new:true})
+    User.findByIdAndUpdate(_id,{$push:{_favoritos:_recipeId}},{new:true})
     .then(user => {
         //Actualizar cantidad de favoritos en receta
         Recipe.findByIdAndUpdate({_id:_recipeId}, {$inc: { favorites: 1 }}, {new:true})
-        .then(recipe => {
-            switch (recipe.favorites) {
-                case 10:
-                    favs10mail(recipe._ownerEmail, recipe.title);
-                case 100:
-                    favs100mail(recipe._ownerEmail, recipe.title);
-                case 1000:
-                    favs1000mail(recipe._ownerEmail, recipe.title);
-            }
+        .then(()=>{
+            res.status(200).json({result:user})
         })
-        res.status(200).json({result:user})
+        .catch( error => res.status(400).json({error}));
     })
     .catch( error => res.status(400).json({error}));
 }
@@ -43,9 +34,13 @@ exports.removeRecipeFromFavorites = (req, res, next) => {
     const {_id} = req.user;
     const{_recipeId} = req.body;
 
-    User.findByIdAndUpdate(_id,{$pull:{_favorites:_recipeId}},{new:true})
+    User.findByIdAndUpdate(_id,{$pull:{_favoritos:_recipeId}},{new:true})
     .then(user => {
-      res.status(200).json({result:user})
+      Recipe.findByIdAndUpdate({_id:_recipeId}, {$inc: { favorites: -1 }}, {new:true})
+      .then(()=>{
+        res.status(200).json({result:user})
+      })
+      .catch( error => res.status(400).json({error}));
     })
     .catch( error => res.status(400).json({error}));
 }

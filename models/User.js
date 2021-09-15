@@ -17,14 +17,12 @@ const userSchema = new Schema({
         required:[true,"Debes agregar una contraseña"]
     },
     ingredientesFavoritos:{
-        type:[String],
-        enum:["Arroz","Pollo","Maiz"]
+        type:[String]
+    },
+    _favoritos:{
+        type:[String]
     },
     _recetas:[{
-        type:Schema.Types.ObjectId,
-        ref:"Recipe"
-    }],
-    _favoritos:[{
         type:Schema.Types.ObjectId,
         ref:"Recipe"
     }],
