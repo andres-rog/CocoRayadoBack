@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "serve -s build",
     "dev": "nodemon ./bin/www"
   },
   "dependencies": {
@@ -21,6 +21,7 @@
     "nodemon": "^2.0.12",
     "passport": "^0.4.1",
     "passport-local-mongoose": "^6.1.0",
+    "serve": "^12.0.1",
     "yarn": "^1.22.11"
   }
 }
