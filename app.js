@@ -21,7 +21,7 @@ const app = express();
 app.use(
     cors({
       credentials: true,
-      origin:["http://localhost:3000","https://www.paginaDeploy.com"]
+      origin:["http://localhost:3000","https://cocorayado.netlify.app"]
     })
   );
 
