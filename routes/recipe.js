@@ -1,8 +1,8 @@
 const router = require('express').Router();
-const {verifyToken} = require('../config/auth');
-const { createRecipe, findRecipes, findRecipe, editRecipe, deleteRecipe } = require('../controllers/recipeController');
-const uploadCloud = require('../config/cloudinary');
-const { upload } = require('../controllers/cloudinaryController');
+const {verifyToken} = require('../config/Auth');
+const { createRecipe, findRecipes, findRecipe, editRecipe, deleteRecipe } = require('../controllers/RecipeController');
+const uploadCloud = require('../config/Cloudinary');
+const { upload } = require('../controllers/CloudinaryController');
 
 router.post('/create', verifyToken, createRecipe);
 router.post('/findRecipes', verifyToken, findRecipes);

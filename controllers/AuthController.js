@@ -1,6 +1,6 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
-const {createToken,clearRes} = require('../config/auth');
+const {createToken,clearRes} = require('../config/Auth');
 
 //Crear usuario
 exports.signUp = (req, res, next) =>{
